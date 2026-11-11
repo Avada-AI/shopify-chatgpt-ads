@@ -1,0 +1,11 @@
+{
+  "name": "chatgpt-channel-skills",
+  "description": "Read-only skills that measure ChatGPT as a sales channel for a Shopify store: traffic and orders, ChatGPT Ads tracking health, and store readiness. Markdown only. No scripts, no hooks, no telemetry.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Avada",
+    "url": "https://docs.avada.io/chatgpt-ads"
+  },
+  "license": "MIT",
+  "keywords": ["shopify", "chatgpt", "chatgpt-ads", "analytics", "attribution", "conversion-tracking", "agent-skills"]
+}
