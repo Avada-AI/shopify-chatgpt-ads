@@ -1,0 +1,60 @@
+{
+  "name": "shopify-chatgpt-ads-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server and agent skills to manage ChatGPT (OpenAI) ads for a Shopify store from your own AI agent. Campaigns start paused; spending needs your explicit yes.",
+  "homepage": "https://github.com/Avada-AI/shopify-chatgpt-ads#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Avada-AI/shopify-chatgpt-ads.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Avada-AI/shopify-chatgpt-ads/issues"
+  },
+  "type": "module",
+  "bin": {
+    "shopify-chatgpt-ads-mcp": "src/cli.js"
+  },
+  "files": [
+    "src",
+    "skills",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "node --test --test-force-exit --test-timeout=30000",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json",
+    "check": "npm run lint && npm run typecheck && npm test",
+    "live:readonly": "node scripts/live-readonly.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "chatgpt-ads",
+    "openai-ads",
+    "shopify",
+    "ai-agent",
+    "claude-code",
+    "codex",
+    "cursor",
+    "agent-skills"
+  ],
+  "license": "MIT",
+  "author": "Avada",
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.4.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@modelcontextprotocol/client": "2.4.0",
+    "@types/node": "26.6.6",
+    "eslint": "10.14.0",
+    "typescript": "7.0.2"
+  }
+}
