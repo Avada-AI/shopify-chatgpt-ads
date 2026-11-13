@@ -15,14 +15,17 @@ jobs:
       matrix:
         node: [22, 24]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Actions are pinned to full commit SHAs (tag in the comment) so a moved tag cannot change CI.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      - name: dist/cli.js is the bundle of src/ (the plugin runs dist)
+        run: npm run build && git diff --exit-code -- dist
       - run: npm test
       - name: Server starts and answers --version
-        run: node src/cli.js --version
+        run: node src/cli.js --version && node dist/cli.js --version

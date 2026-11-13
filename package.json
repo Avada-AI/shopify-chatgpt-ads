@@ -1,9 +1,8 @@
 {
   "name": "shopify-chatgpt-ads-mcp",
-  "version": "0.2.0",
-  "mcpName": "io.github.Avada-AI/shopify-chatgpt-ads",
+  "version": "0.2.1",
   "private": true,
-  "description": "MCP server and agent skills to manage ChatGPT (OpenAI) ads for a Shopify store from your own AI agent. Campaigns start paused; spending needs your explicit yes.",
+  "description": "MCP server and agent skills to manage ChatGPT (OpenAI) ads for a Shopify store from your own AI agent. Campaigns start paused; spending and permanent changes are gated behind your yes.",
   "homepage": "https://github.com/Avada-AI/shopify-chatgpt-ads#readme",
   "repository": {
     "type": "git",
@@ -18,6 +17,7 @@
   },
   "files": [
     "src",
+    "dist",
     "README.md",
     "LICENSE"
   ],
@@ -26,10 +26,11 @@
   },
   "scripts": {
     "start": "node src/cli.js",
+    "build": "node scripts/build.js",
     "test": "node --test --test-force-exit --test-timeout=30000",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json",
-    "check": "npm run lint && npm run typecheck && npm test",
+    "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "live:readonly": "node scripts/live-readonly.js"
   },
   "keywords": [
@@ -54,6 +55,7 @@
     "@eslint/js": "10.0.1",
     "@modelcontextprotocol/client": "2.4.0",
     "@types/node": "26.6.6",
+    "esbuild": "0.28.2",
     "eslint": "10.14.0",
     "typescript": "7.0.2"
   }

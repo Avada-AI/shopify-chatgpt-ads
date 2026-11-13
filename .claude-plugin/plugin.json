@@ -1,8 +1,8 @@
 {
   "name": "shopify-chatgpt-ads",
   "displayName": "Shopify ChatGPT Ads",
-  "description": "Manage ChatGPT (OpenAI) ads for a Shopify store from your agent: campaigns, ads, reports, product feed, tracking. Everything starts paused; spending needs your explicit yes. Measured orders and True ROAS through Avada's free app. Plus read-only skills for ChatGPT traffic, tracking and store readiness.",
-  "version": "0.2.0",
+  "description": "Manage ChatGPT (OpenAI) ads for a Shopify store from your agent: campaigns, ads, reports, product feed, tracking. Everything starts paused; spending and permanent changes wait for your yes (asked by your client or through a confirmed dry run). Measured orders and True ROAS through Avada's free app. Plus read-only skills for ChatGPT traffic, tracking and store readiness.",
+  "version": "0.2.1",
   "author": {
     "name": "Avada",
     "url": "https://github.com/Avada-AI"
@@ -45,7 +45,7 @@
     "chatgpt-ads": {
       "command": "node",
       "args": [
-        "${CLAUDE_PLUGIN_ROOT}/src/cli.js"
+        "${CLAUDE_PLUGIN_ROOT}/dist/cli.js"
       ],
       "env": {
         "OPENAI_ADS_API_KEY": "${user_config.openai_ads_api_key}",

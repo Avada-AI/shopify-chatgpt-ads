@@ -10,14 +10,15 @@ import {StdioClientTransport} from '@modelcontextprotocol/client/stdio';
 import {startFakeOpenAI} from './fakes.js';
 import {ADS_KEY} from './helpers.js';
 
-test('a real MCP client starts the CLI over stdio, lists tools and calls a read tool', async () => {
+// src/ is what developers run; dist/cli.js is the bundle the Claude Code plugin starts.
+for (const entry of ['../src/cli.js', '../dist/cli.js']) test(`a real MCP client starts ${entry.slice(3)} over stdio, lists tools and calls a read tool`, async () => {
   const openai = await startFakeOpenAI({key: ADS_KEY});
   const stderr = new PassThrough();
   let stderrText = '';
   stderr.on('data', chunk => (stderrText += chunk));
   const transport = new StdioClientTransport({
     command: process.execPath,
-    args: [fileURLToPath(new URL('../src/cli.js', import.meta.url))],
+    args: [fileURLToPath(new URL(entry, import.meta.url))],
     env: {
       PATH: process.env.PATH || '',
       OPENAI_ADS_API_KEY: ADS_KEY,
