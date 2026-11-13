@@ -1,5 +1,13 @@
 # What was tested, and what was not
 
+## v0.2.1 (2026-11-13)
+
+- `npm run check`: ESLint, `tsc --checkJs`, the bundle build and `node --test` (44 tests) on Node.js 26. New tests: each gated tool (dry run, a forged `plan_id` refused, the right one applied once) and the harmless variant of each applied at once; `plan_id` expiry after 10 minutes and single use; a bid raised after the activation dry run voids it; elicitation accepted, declined, and accepted with `approve: false`, with `confirm` + `plan_id` ignored when the client can be asked; the untrusted-data note in every tool description; recent pixel events without payloads, a hostile custom event name withheld; every error of the live measurement API (400, 401, 403, 404 both kinds, 413, 429 per caller and per store, 502 `NOT_CONNECTED`, `KEY_INVALID` and `UPSTREAM`, 503, 500, network) and the app embed check (`on` false, null, true); a new campaign after an archive; the audit log tightened to 600; the stdio end-to-end test against both `src/cli.js` and `dist/cli.js`.
+- Fresh clone, as the plugin starts it: `git clone` of the repository into an empty directory with no `npm install` (no `node_modules` anywhere above it), then `node <clone>/dist/cli.js` exactly as `.claude-plugin/plugin.json` says, with the plugin's environment (empty keys, `CHATGPT_ADS_READ_ONLY=false`). A raw JSON-RPC client over stdio got `initialize` (protocol 2025-06-18, server 0.2.1, instructions), `tools/list` (46 tools) and a `tools/call` answering `KEY_MISSING`. The plugin install itself (`/plugin install` inside Claude Code) was not run.
+- `claude plugin validate .` (Claude Code 2.1.323): passed, one warning (no icon).
+- Elicitation was tested with the official MCP client (2025 protocol, `elicitation/create`). Not run inside Claude Code, Codex or Cursor.
+- The live measurement API was not called; the fake answers in the shapes of its v1 contract.
+
 ## v0.2.0: MCP server and the `chatgpt-ads-*` skills (2026-11-13)
 
 ### Automated (`npm run check`)
@@ -15,13 +23,13 @@
 
 ### Live, read-only (`npm run live:readonly`, 2026-11-13)
 
-Against Avada's probe ad account (currency VND, no payment method). Server in read-only mode and a guard that refuses any request but GET and the product query POST. All 13 tool calls answered: account, 2 campaigns with `budget_display`, a campaign tree (1 live ad group, 1 live ad), Insights totals and a country breakdown (0 rows: no delivery), 5 feeds, upload history (empty), a product query (102 of 102), 2 pixels, recent events (0 in the window), 12 conversion event settings, location search, 5 audit log entries. Finding fixed the same day: feeds are listed with `feed_id`, not `id` (fact A15). Nothing was created, changed or previewed.
+Against a live ad account of Avada's. Server in read-only mode and a guard that refuses any request but GET and the product query POST. All 13 tool calls answered. Finding fixed the same day: feeds are listed with `feed_id`, not `id` (fact A15). Nothing was created, changed or previewed.
 
 ### Not tested in v0.2.0
 
-- **No write against a real ad account** from this kit: create, edit, pause, archive, activate, budget, bid and Delta calls were tested against the fake only. Their bodies follow the docs and the shapes Avada measured on its own app (fact sheet A).
+- **No write against a real ad account** from this kit: create, edit, pause, archive, activate, budget, bid and Delta calls were tested against the fake only. Their bodies follow the docs and the shapes Avada observed with its own app (fact sheet A).
 - **Avada's Measurement API** is a preview contract; the proxy was tested against a fake only.
-- **Install paths not run:** plugin install from GitHub (including Claude Code's dependency install from `package-lock.json`), `npx` (not published), Codex, Cursor, the `skills` CLI with the new skills.
+- **Install paths not run:** plugin install from GitHub, `npx` (not published), Codex, Cursor, the `skills` CLI with the new skills.
 - **No skill was run inside an agent** end to end.
 - Node.js 20 and Windows were not run.
 
