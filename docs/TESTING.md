@@ -1,5 +1,32 @@
 # What was tested, and what was not
 
+## v0.2.0: MCP server and the `chatgpt-ads-*` skills (2026-11-13)
+
+### Automated (`npm run check`)
+
+- ESLint and `tsc --checkJs` over `src/`, `test/` and `scripts/`: clean.
+- `node --test`: 34 tests, all passing on Node.js 26 (CI runs Node.js 22 and 24 once pushed). They run the real server against a fake OpenAI Ads API and a fake Avada API (`test/fakes.js`), whose shapes follow OpenAI's documented examples and Avada's measurements:
+  - every read tool; money in micros and minor units (USD, EUR, VND, JPY, KWD, HUF); idempotency keys; error codes by HTTP status (401, 403 admin, 404, 409, 413, 422, 429, 5xx) with `server_error` bodies on 4xx; retries for reads and keyed creates only;
+  - safety: creates paused even when the agent asks for active; updates never carry status or budget; `activate_campaign`, `set_budget`, `set_bid` refuse without `confirm` and the current `plan_id`, and a plan goes stale when the budget changes; activation order ads -> ad groups -> campaign; read-only mode registers 30 read tools and no write tool; the audit log gets a request and a result line per write, none for reads, mode 600, and a write is refused when the log cannot be written; keys never appear in answers, errors or the log, even when the upstream echoes the bearer token;
+  - Delta API: minor units, one request, a 422 explained as nothing applied;
+  - measurement proxy: without a key (no call, steps, no numbers), with a key, app not installed, app embed off (error and warning forms), revoked key (not echoed), 404, 429, 500, network failure, read-only mode;
+  - end to end: the official MCP client (`@modelcontextprotocol/client` 2.4.0) starts `src/cli.js` over stdio, lists 46 tools and calls `get_ad_account`; stderr says the key is set and never prints it.
+- `claude plugin validate .` (Claude Code 2.1.323): passed, with directory-listing warnings (no icon).
+
+### Live, read-only (`npm run live:readonly`, 2026-11-13)
+
+Against Avada's probe ad account (currency VND, no payment method). Server in read-only mode and a guard that refuses any request but GET and the product query POST. All 13 tool calls answered: account, 2 campaigns with `budget_display`, a campaign tree (1 live ad group, 1 live ad), Insights totals and a country breakdown (0 rows: no delivery), 5 feeds, upload history (empty), a product query (102 of 102), 2 pixels, recent events (0 in the window), 12 conversion event settings, location search, 5 audit log entries. Finding fixed the same day: feeds are listed with `feed_id`, not `id` (fact A15). Nothing was created, changed or previewed.
+
+### Not tested in v0.2.0
+
+- **No write against a real ad account** from this kit: create, edit, pause, archive, activate, budget, bid and Delta calls were tested against the fake only. Their bodies follow the docs and the shapes Avada measured on its own app (fact sheet A).
+- **Avada's Measurement API** is a preview contract; the proxy was tested against a fake only.
+- **Install paths not run:** plugin install from GitHub (including Claude Code's dependency install from `package-lock.json`), `npx` (not published), Codex, Cursor, the `skills` CLI with the new skills.
+- **No skill was run inside an agent** end to end.
+- Node.js 20 and Windows were not run.
+
+## v0.1.0: the three read-only skills
+
 Date of this record: **2026-11-11**. Version: 0.1.0.
 
 Short version: the field names, queries and manifests were checked against documentation, a schema validator and public pages. **No skill has been run end to end on a live store, on an ad account, or inside an agent.** Treat every query as unproven until the checklist at the end has been done.
