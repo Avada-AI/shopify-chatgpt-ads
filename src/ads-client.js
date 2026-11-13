@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 /**
  * Client for the OpenAI Advertiser API (https://api.ads.openai.com/v1).
  *
- * Facts it encodes (docs 2026-11-13, measured by Avada on live accounts 2026-09 to 2026-11):
+ * Facts it encodes (docs 2026-11-13, observed by Avada on a live ad account 2026-09 to 2026-11):
  * - updates are POST; the only PATCH is the feed Delta API
  * - errors are classified by HTTP status only; error bodies can say `server_error` on a 4xx
  * - a create is retried only when it carries an Idempotency-Key (no duplicate campaigns)
@@ -81,7 +81,8 @@ export function encodeQuery(params = {}) {
 }
 
 /**
- * Same logical create -> same key, so a retried create returns the first object.
+ * Same logical create -> same key, so a retried create returns the first object (after an
+ * archive the tools move on to a new key: createOnce in ./tools/ads.js).
  *
  * @param {string} kind
  * @param {unknown} body

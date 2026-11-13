@@ -16,7 +16,7 @@ Fact ids such as (A4) point to `references/chatgpt-facts.md` at the root of this
 
 ## Rules
 
-1. **Cut freely, raise never on your own.** Pausing and lowering a budget are allowed after the user agrees to the list. Raising a budget or a bid goes through `set_budget` / `set_bid` dry runs and needs an explicit yes to that exact plan (the server asks for `confirm` and `plan_id`). This skill never proposes a raise unless the user asked for one.
+1. **Cut freely, raise never on your own.** Pausing and lowering a budget are allowed after the user agrees to the list. Raising a budget or a bid goes through `set_budget` / `set_bid` dry runs and needs an explicit yes to that exact plan (where the client supports it the server asks the user itself; otherwise it wants `confirm` and the `plan_id` of the dry run, within 10 minutes). This skill never proposes a raise unless the user asked for one.
 2. **Propose, then act.** Show the full list of proposed changes first; apply only the ones the user approves.
 3. **One currency.** Target, spend and budgets are all in the ad account currency (`get_ad_account`). If the user gives the target in another currency, ask them to restate it; do not convert.
 4. **Unknown is not zero.** Days with no report are unknown; recent spend can still change (A5).

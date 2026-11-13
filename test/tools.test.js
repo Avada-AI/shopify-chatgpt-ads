@@ -147,23 +147,26 @@ test('updates never carry status or budget, and keep targeting not mentioned', a
   assert.deepEqual(sent('POST', '/ads/ad_card').at(-1)?.body, {creative: {type: 'chat_card', title: 'New title', body: 'Made for rocks', target_url: 'https://shop.example/trail', file_id: 'file_9'}});
 });
 
-test('pause and archive apply directly', async () => {
-  for (const [name, path] of [['pause_ad', '/ads/ad_card/pause'], ['pause_ad_group', '/ad_groups/adgrp_old/pause'], ['archive_ad_group', '/ad_groups/adgrp_old/archive'], ['pause_campaign', '/campaigns/cmpn_live/pause']]) {
+test('pause applies directly; archive asks first, then archives', async () => {
+  for (const [name, path] of [['pause_ad', '/ads/ad_card/pause'], ['pause_ad_group', '/ad_groups/adgrp_old/pause'], ['pause_campaign', '/campaigns/cmpn_live/pause']]) {
     const arg = name.endsWith('_ad') ? {ad_id: 'ad_card'} : name.includes('group') ? {ad_group_id: 'adgrp_old'} : {campaign_id: 'cmpn_live'};
     assert.equal((await kit.call(name, arg)).isError, false);
     assert.equal(sent('POST', path).length, 1, name);
   }
   const created = await kit.call('create_campaign', {name: 'To archive', budget_type: 'lifetime', budget_amount: '10'});
   const ad = await kit.call('create_ad', {ad_group_id: 'adgrp_1', name: 'To archive', type: 'chat_card', title: 'Abc', body: 'x', target_url: 'https://a.example', file_id: 'file_1'});
-  assert.equal((await kit.call('archive_ad', {ad_id: ad.body.ad.id})).isError, false);
-  assert.equal((await kit.call('archive_campaign', {campaign_id: created.body.campaign.id})).body.campaign.status, 'archived');
+  assert.equal((await kit.approve('archive_ad', {ad_id: ad.body.ad.id})).isError, false);
+  assert.equal((await kit.approve('archive_ad_group', {ad_group_id: 'adgrp_1'})).body.ad_group.status, 'archived');
+  kit.openai.store.groups.get('adgrp_1').status = 'paused';
+  assert.equal((await kit.approve('archive_campaign', {campaign_id: created.body.campaign.id})).body.campaign.status, 'archived');
+  assert.equal((await kit.call('archive_campaign', {campaign_id: created.body.campaign.id})).body.already_archived, true);
 });
 
 test('Delta API: minor units, one request, 422 explained as nothing applied', async () => {
-  const ok = await kit.call('update_feed_products', {feed_id: 'fd_1', products: [{product_id: 'p1', variants: [{variant_id: 'v1', price: '79.99', currency: 'USD'}, {variant_id: 'v2', availability: 'out_of_stock'}]}]});
+  const ok = await kit.approve('update_feed_products', {feed_id: 'fd_1', products: [{product_id: 'p1', variants: [{variant_id: 'v1', price: '79.99', currency: 'USD'}, {variant_id: 'v2', availability: 'out_of_stock'}]}]});
   assert.equal(ok.body.accepted, true);
   assert.deepEqual(sent('PATCH', '/feeds/fd_1/products').at(-1)?.body, {products: [{id: 'p1', variants: [{id: 'v1', price: {amount: 7999, currency: 'USD'}}, {id: 'v2', availability: {status: 'out_of_stock'}}]}]});
-  const unknown = await kit.call('update_feed_products', {feed_id: 'fd_1', products: [{product_id: 'p1', variants: [{variant_id: 'v1', price: '70', currency: 'USD'}, {variant_id: 'v404', availability: 'in_stock'}]}]});
+  const unknown = await kit.call('update_feed_products', {feed_id: 'fd_1', products: [{product_id: 'p1', variants: [{variant_id: 'v1', availability: 'in_stock'}, {variant_id: 'v404', availability: 'in_stock'}]}]});
   assert.equal(unknown.isError, true);
   assert.equal(unknown.body.error.http_status, 422);
   assert.match(unknown.body.error.message, /v404.*NOTHING was applied/);
@@ -174,4 +177,14 @@ test('Delta API: minor units, one request, 422 explained as nothing applied', as
 test('ids cannot reach other endpoints through the path', async () => {
   const res = await kit.call('get_campaign', {campaign_id: '../ad_account'});
   assert.equal(res.isError, true);
+});
+
+test('recent pixel events: types, channels, times and counts only, never the payload', async () => {
+  const {body} = await kit.call('list_recent_conversion_events', {pixel_id: '1345'});
+  assert.equal(body.total, 2);
+  assert.deepEqual(body.by_event_type, {checkout_started: 1, custom: 1});
+  assert.deepEqual(body.by_channel, {pixel_sdk: 2});
+  const text = JSON.stringify(body);
+  assert.ok(!text.includes('event_data_json') && !text.includes('8900') && !text.includes('SYSTEM'), text);
+  assert.equal(body.events[1].custom_event_name, '[not shown]', 'free text is not passed on');
 });

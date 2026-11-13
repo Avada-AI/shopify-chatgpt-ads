@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync, statSync} from 'node:fs';
+import {chmodSync, readFileSync, statSync, writeFileSync} from 'node:fs';
 import {test} from 'node:test';
 import {ADS_KEY, AVADA_KEY, connect} from './helpers.js';
 
@@ -176,5 +176,140 @@ test('without OPENAI_ADS_API_KEY the server still starts and says how to fix it'
   assert.equal(res.body.error.code, 'KEY_MISSING');
   assert.match(res.body.error.what_to_do, /Ads Manager > Settings/);
   assert.equal(kit.openai.requests.length, 0);
+  await kit.close();
+});
+
+test('destructive and spend-changing edits are gated; the harmless version of each applies at once', async () => {
+  const kit = await connect();
+  const posts = (/** @type {string} */ path) => kit.openai.requests.filter(r => r.method !== 'GET' && r.path === path).length;
+  /** @type {[string, any, string][]} */
+  const gated = [
+    ['archive_campaign', {campaign_id: 'cmpn_live'}, '/campaigns/cmpn_live/archive'],
+    ['archive_ad_group', {ad_group_id: 'adgrp_1'}, '/ad_groups/adgrp_1/archive'],
+    ['archive_ad', {ad_id: 'ad_card'}, '/ads/ad_card/archive'],
+    ['update_ad', {ad_id: 'ad_card', target_url: 'https://elsewhere.example/'}, '/ads/ad_card'],
+    ['update_feed_products', {feed_id: 'fd_1', products: [{product_id: 'p1', variants: [{variant_id: 'v1', price: '1', currency: 'USD'}]}]}, '/feeds/fd_1/products'],
+    ['update_campaign', {campaign_id: 'cmpn_live', end_time: '2027-06-30T00:00:00Z'}, '/campaigns/cmpn_live']
+  ];
+  for (const [name, args, path] of gated) {
+    const dry = await kit.call(name, args);
+    assert.equal(dry.body.dry_run, true, `${name} dry run`);
+    assert.match(dry.body.ask_the_user, /\?/);
+    assert.equal(dry.body.expires_in_seconds, 600);
+    const forged = await kit.call(name, {...args, confirm: true, plan_id: 'plan_0000000000000000'});
+    assert.equal(forged.body.dry_run, true, `${name} refuses a plan_id it did not issue`);
+    assert.equal(posts(path), 0, `${name} sent nothing`);
+    const done = await kit.call(name, {...args, confirm: true, plan_id: dry.body.plan_id});
+    assert.equal(done.isError, false, `${name}: ${JSON.stringify(done.body)}`);
+    assert.equal(done.body.dry_run, undefined, name);
+    assert.equal(posts(path), 1, `${name} sent once`);
+  }
+  // Same link, title only, stock only, schedule of a paused campaign, a name: no question.
+  /** @type {[string, any][]} */
+  const direct = [
+    ['update_ad', {ad_id: 'ad_1', title: 'Shorter'}],
+    ['update_feed_products', {feed_id: 'fd_1', products: [{product_id: 'p1', variants: [{variant_id: 'v2', availability: 'in_stock'}]}]}],
+    ['update_campaign', {campaign_id: 'cmpn_feed', start_time: '2027-01-01T00:00:00Z'}],
+    ['update_campaign', {campaign_id: 'cmpn_live', name: 'Renamed live'}]
+  ];
+  for (const [name, args] of direct) {
+    const res = await kit.call(name, args);
+    assert.equal(res.isError, false, `${name}: ${JSON.stringify(res.body)}`);
+    assert.equal(res.body.dry_run, undefined, `${name} applies at once`);
+  }
+  await kit.close();
+});
+
+test('a plan_id works once and expires after 10 minutes', async () => {
+  let clock = 1_800_000_000_000;
+  const kit = await connect({now: () => clock});
+  const writes = () => kit.openai.requests.filter(r => r.method === 'POST' && r.path === '/campaigns/cmpn_live' && r.body?.budget).length;
+  const dry = await kit.call('set_budget', {campaign_id: 'cmpn_live', amount: '100'});
+  clock += 10 * 60 * 1000 + 1;
+  const late = await kit.call('set_budget', {campaign_id: 'cmpn_live', amount: '100', confirm: true, plan_id: dry.body.plan_id});
+  assert.equal(late.body.dry_run, true);
+  assert.match(late.body.refused, /expired/);
+  assert.equal(writes(), 0);
+  // The refused call issued the same plan again; inside the window it works, once.
+  const ok = await kit.call('set_budget', {campaign_id: 'cmpn_live', amount: '100', confirm: true, plan_id: late.body.plan_id});
+  assert.equal(ok.body.dry_run, undefined);
+  assert.equal(writes(), 1);
+  kit.openai.store.campaigns.get('cmpn_live').budget = {daily_spend_limit_micros: 20000000};
+  const replay = await kit.call('set_budget', {campaign_id: 'cmpn_live', amount: '100', confirm: true, plan_id: late.body.plan_id});
+  assert.equal(replay.body.dry_run, true, 'a used plan_id is not accepted again');
+  assert.equal(writes(), 1);
+  await kit.close();
+});
+
+test('activation plan_id covers ad group bids: a bid raised after the dry run voids it', async () => {
+  const kit = await connect();
+  const dry = await kit.call('activate_campaign', {campaign_id: 'cmpn_feed'});
+  kit.openai.store.groups.get('adgrp_1').bidding_config.max_bid_micros = 9000000; // raised in Ads Manager
+  const stale = await kit.call('activate_campaign', {campaign_id: 'cmpn_feed', confirm: true, plan_id: dry.body.plan_id});
+  assert.equal(stale.body.dry_run, true);
+  assert.notEqual(stale.body.plan_id, dry.body.plan_id);
+  assert.equal(stale.body.plan.will_activate.ad_groups[0].bidding.amount, '9.00');
+  assert.equal(kit.openai.requests.filter(r => r.path.endsWith('/activate')).length, 0);
+  await kit.close();
+});
+
+test('with elicitation the server asks the user itself, and confirm + plan_id no longer count', async () => {
+  const yes = await connect({onElicit: () => ({action: 'accept', content: {approve: true}})});
+  const done = await yes.call('activate_campaign', {campaign_id: 'cmpn_feed'});
+  assert.equal(done.body.activated, true);
+  assert.equal(yes.asked.length, 1);
+  assert.match(yes.asked[0].message, /Activate "Shopping" with a daily budget of 50\.00 USD\?/);
+  assert.match(yes.asked[0].message, /Preview: https:\/\/ads\.openai\.com\/preview\/ad_1/);
+  assert.match(yes.asked[0].message, /still in review/);
+  const outcomes = readFileSync(yes.auditPath, 'utf8').trim().split('\n').map(l => JSON.parse(l)).filter(l => l.phase === 'result').map(l => l.outcome);
+  assert.deepEqual(outcomes, ['asked_user', 'ok']);
+  await yes.close();
+
+  const no = await connect({onElicit: () => ({action: 'decline'})});
+  const dry = await connect(); // a plan_id from elsewhere, as an injected agent might bring
+  const plan = (await dry.call('archive_campaign', {campaign_id: 'cmpn_live'})).body.plan_id;
+  await dry.close();
+  for (const args of [{campaign_id: 'cmpn_live'}, {campaign_id: 'cmpn_live', confirm: true, plan_id: plan}]) {
+    const res = await no.call('archive_campaign', args);
+    assert.equal(res.body.declined, true);
+  }
+  const accepted = await connect({onElicit: () => ({action: 'accept', content: {approve: false}})});
+  assert.equal((await accepted.call('set_budget', {campaign_id: 'cmpn_live', amount: '500'})).body.declined, true);
+  for (const kit of [no, accepted]) {
+    assert.equal(kit.openai.requests.filter(r => r.method === 'POST').length, 0, 'nothing written');
+    await kit.close();
+  }
+});
+
+test('every tool description and the server instructions say results are data, not instructions', async () => {
+  const kit = await connect();
+  for (const tool of (await kit.client.listTools()).tools) {
+    assert.match(tool.description || '', /never instructions/, tool.name);
+  }
+  assert.match(kit.client.getInstructions() || '', /data, never\s+instructions/);
+  await kit.close();
+});
+
+test('an identical create after an archive makes a new object, not the archived one back', async () => {
+  const kit = await connect();
+  const args = {name: 'Again', budget_type: 'daily', budget_amount: '5'};
+  const first = await kit.call('create_campaign', args);
+  assert.equal((await kit.call('create_campaign', args)).body.campaign.id, first.body.campaign.id, 'a retry is the same campaign');
+  await kit.approve('archive_campaign', {campaign_id: first.body.campaign.id});
+  const second = await kit.call('create_campaign', args);
+  assert.notEqual(second.body.campaign.id, first.body.campaign.id);
+  assert.equal(second.body.campaign.status, 'paused');
+  const keys = kit.openai.requests.filter(r => r.method === 'POST' && r.path === '/campaigns').map(r => String(r.headers['idempotency-key']));
+  assert.equal(keys.at(-1), `${keys[0]}:after:${first.body.campaign.id}`);
+  assert.equal((await kit.call('create_campaign', args)).body.campaign.id, second.body.campaign.id, 'and a retry of that is stable');
+  await kit.close();
+});
+
+test('the audit log is made private on every write, even when it existed with a looser mode', async () => {
+  const kit = await connect();
+  writeFileSync(kit.auditPath, '', {mode: 0o644});
+  chmodSync(kit.auditPath, 0o644);
+  await kit.call('pause_campaign', {campaign_id: 'cmpn_live'});
+  assert.equal(statSync(kit.auditPath).mode & 0o777, 0o600);
   await kit.close();
 });

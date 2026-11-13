@@ -34,7 +34,7 @@ Fact ids such as (A14) point to `references/chatgpt-facts.md`; (O12) is the prod
 5. Shopping campaigns: for each ad group, run its product filters through `query_feed_products`. `matched_count: 0` means the ad group can show nothing.
 6. Group findings by fix:
    - **Fix in Shopify** (images, GTIN/barcode, brand/vendor, description, policies): give the product and the field to edit. A re-uploaded file did NOT change items OpenAI already held in Avada's test (A14); after editing, the change may need the Delta API (price, stock, title) or OpenAI's next full refresh.
-   - **Fix at OpenAI now** (price, stock, title on existing variants): build one `update_feed_products` call. `product_id` = group id (item id when not grouped), `variant_id` = item id, price in major units with its currency.
+   - **Fix at OpenAI now** (price, stock, title on existing variants): build one `update_feed_products` call. `product_id` = group id (item id when not grouped), `variant_id` = item id, price in major units with its currency. A price change is gated like a budget raise: the server asks the user, or returns a plan to show them and confirm with its `plan_id` after their yes.
 7. On yes, send the Delta call. If OpenAI answers 422, nothing was applied: drop the variant ids it names (not in the feed; they need a full upload) and send the rest again. Check with `query_feed_products` after about a minute.
 
 ## Output

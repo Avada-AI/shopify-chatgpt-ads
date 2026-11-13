@@ -8,7 +8,7 @@ test('micros: major units to integer micros without float error', () => {
   assert.equal(toMicros('2.5', 'USD'), 2500000);
   assert.equal(toMicros(0.1, 'USD'), 100000);
   assert.equal(toMicros('19.99', 'EUR'), 19990000);
-  assert.equal(toMicros('120000', 'VND'), 120000000000); // MEASURED: VND daily minimum
+  assert.equal(toMicros('120000', 'VND'), 120000000000); // a zero-decimal currency
   assert.equal(toMicros('12.345', 'KWD'), 12345000);
   assert.throws(() => toMicros('1.5', 'JPY'), /at most 0 decimals/);
   assert.throws(() => toMicros('1.234', 'USD'), /at most 2 decimals/);
