@@ -1,0 +1,41 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Avada-AI/shopify-chatgpt-ads",
+  "description": "Manage ChatGPT (OpenAI) ads for a Shopify store: campaigns start paused, spending needs an explicit yes.",
+  "version": "0.2.0",
+  "repository": {
+    "url": "https://github.com/Avada-AI/shopify-chatgpt-ads",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "shopify-chatgpt-ads-mcp",
+      "version": "0.2.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "OPENAI_ADS_API_KEY",
+          "description": "OpenAI Advertiser API key (Ads Manager > Settings > API keys)",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "AVADA_API_KEY",
+          "description": "Optional avk_live_ key from Avada ChatGPT Ads for measured orders and True ROAS",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "CHATGPT_ADS_READ_ONLY",
+          "description": "Set to 1 to offer no write tool",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

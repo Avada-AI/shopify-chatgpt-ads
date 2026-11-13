@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "shopify-chatgpt-ads",
-  "version": "0.1.0",
-  "description": "Read-only skills that measure ChatGPT as a sales channel for a Shopify store: traffic and orders, ChatGPT Ads tracking health, and store readiness. Markdown only. No scripts, no hooks, no telemetry.",
+  "version": "0.2.0",
+  "description": "Manage ChatGPT (OpenAI) ads for a Shopify store from your agent through a local MCP server (paused by default, spending only on your explicit yes), plus skills for weekly reports, launches, budget guard, feed fixes, tracking checks, ChatGPT traffic and store readiness.",
   "author": {
     "name": "Avada",
     "url": "https://github.com/Avada-AI"
@@ -10,5 +10,14 @@
   "license": "MIT",
   "homepage": "https://github.com/Avada-AI/shopify-chatgpt-ads",
   "repository": "https://github.com/Avada-AI/shopify-chatgpt-ads",
-  "keywords": ["shopify", "chatgpt", "chatgpt-ads", "analytics", "attribution", "conversion-tracking", "agent-skills"]
+  "keywords": [
+    "shopify",
+    "chatgpt",
+    "chatgpt-ads",
+    "openai-ads",
+    "mcp",
+    "roas",
+    "conversion-tracking",
+    "agent-skills"
+  ]
 }

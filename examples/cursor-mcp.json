@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "chatgpt-ads": {
+      "command": "npx",
+      "args": ["-y", "shopify-chatgpt-ads-mcp"],
+      "env": {
+        "OPENAI_ADS_API_KEY": "${env:OPENAI_ADS_API_KEY}",
+        "AVADA_API_KEY": "${env:AVADA_API_KEY}"
+      }
+    },
+    "avada-measurement": {
+      "url": "https://avada-chatgpt.firebaseapp.com/mcp"
+    }
+  }
+}

@@ -1,14 +1,15 @@
 {
   "name": "avada-ai",
   "owner": {
-    "name": "Avada"
+    "name": "Avada",
+    "url": "https://github.com/Avada-AI"
   },
-  "description": "Read-only skills that measure ChatGPT as a sales channel for a Shopify store.",
+  "description": "Avada's agent tools for Shopify merchants who sell through ChatGPT.",
   "plugins": [
     {
       "name": "shopify-chatgpt-ads",
       "source": "./",
-      "description": "Three read-only skills: ChatGPT traffic report, ChatGPT Ads tracking check, ChatGPT store readiness. Markdown only."
+      "description": "MCP server and skills to manage ChatGPT (OpenAI) ads for a Shopify store: paused by default, spending only on your yes, measured orders and True ROAS through Avada's free app."
     }
   ]
 }
