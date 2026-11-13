@@ -40,7 +40,7 @@ You need Node.js 20 or later (tested on 22, 24 and 26) and an Advertiser API key
 export OPENAI_ADS_API_KEY=...        # add it to your shell profile or a secret manager
 ```
 
-> **Status:** v0.2.0, not yet published to npm. Until it is, use the Claude Code plugin (it runs from the repository), or clone and run from source: `git clone https://github.com/Avada-AI/shopify-chatgpt-ads && cd shopify-chatgpt-ads && npm ci`, then use `node /path/to/shopify-chatgpt-ads/src/cli.js` wherever the examples below say `npx -y shopify-chatgpt-ads-mcp`.
+> **Status:** v0.2.0. It runs straight from this repository: `npx -y github:Avada-AI/shopify-chatgpt-ads` (no npm package; do not install a package with a similar name from npm).
 
 ### Claude Code
 
@@ -55,7 +55,7 @@ Or the MCP server alone, reading the key from your environment when it starts:
 
 ```bash
 claude mcp add-json chatgpt-ads --scope user \
-  '{"command":"npx","args":["-y","shopify-chatgpt-ads-mcp"],"env":{"OPENAI_ADS_API_KEY":"${OPENAI_ADS_API_KEY}"}}'
+  '{"command":"npx","args":["-y", "github:Avada-AI/shopify-chatgpt-ads"],"env":{"OPENAI_ADS_API_KEY":"${OPENAI_ADS_API_KEY}"}}'
 ```
 
 Project config example: [`examples/claude-code.mcp.json`](examples/claude-code.mcp.json).
@@ -67,7 +67,7 @@ Add to `~/.codex/config.toml` ([full example](examples/codex-config.toml)):
 ```toml
 [mcp_servers.chatgpt-ads]
 command = "npx"
-args = ["-y", "shopify-chatgpt-ads-mcp"]
+args = ["-y", "github:Avada-AI/shopify-chatgpt-ads"]
 env_vars = ["OPENAI_ADS_API_KEY", "AVADA_API_KEY"]
 ```
 
@@ -82,7 +82,7 @@ env_vars = ["OPENAI_ADS_API_KEY", "AVADA_API_KEY"]
   "mcpServers": {
     "chatgpt-ads": {
       "command": "npx",
-      "args": ["-y", "shopify-chatgpt-ads-mcp"],
+      "args": ["-y", "github:Avada-AI/shopify-chatgpt-ads"],
       "env": {"OPENAI_ADS_API_KEY": "${env:OPENAI_ADS_API_KEY}"}
     }
   }
@@ -91,7 +91,7 @@ env_vars = ["OPENAI_ADS_API_KEY", "AVADA_API_KEY"]
 
 ### Any other MCP client
 
-Run `npx -y shopify-chatgpt-ads-mcp` over stdio with `OPENAI_ADS_API_KEY` in its environment ([example](examples/generic-mcp.json)). Registry metadata: [`server.json`](server.json).
+Run `npx -y github:Avada-AI/shopify-chatgpt-ads` over stdio with `OPENAI_ADS_API_KEY` in its environment ([example](examples/generic-mcp.json)). Registry metadata: [`server.json`](server.json).
 
 ### Skills only
 

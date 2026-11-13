@@ -2,7 +2,7 @@
   "mcpServers": {
     "chatgpt-ads": {
       "command": "npx",
-      "args": ["-y", "shopify-chatgpt-ads-mcp"],
+      "args": ["-y", "github:Avada-AI/shopify-chatgpt-ads"],
       "env": {
         "OPENAI_ADS_API_KEY": "<your Advertiser API key, or a reference to a secret store>"
       }

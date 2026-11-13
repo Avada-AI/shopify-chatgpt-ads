@@ -1,7 +1,7 @@
 # Add to ~/.codex/config.toml. The keys stay in your shell environment; Codex forwards them.
 [mcp_servers.chatgpt-ads]
 command = "npx"
-args = ["-y", "shopify-chatgpt-ads-mcp"]
+args = ["-y", "github:Avada-AI/shopify-chatgpt-ads"]
 env_vars = ["OPENAI_ADS_API_KEY", "AVADA_API_KEY", "CHATGPT_ADS_READ_ONLY"]
 
 # Avada's hosted server for measured orders and True ROAS (preview). Sign in with:
