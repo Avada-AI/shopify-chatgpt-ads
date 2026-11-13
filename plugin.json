@@ -1,12 +1,14 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
-  "name": "chatgpt-channel-skills",
+  "name": "shopify-chatgpt-ads",
   "version": "0.1.0",
   "description": "Read-only skills that measure ChatGPT as a sales channel for a Shopify store: traffic and orders, ChatGPT Ads tracking health, and store readiness. Markdown only. No scripts, no hooks, no telemetry.",
   "author": {
     "name": "Avada",
-    "url": "https://docs.avada.io/chatgpt-ads"
+    "url": "https://github.com/Avada-AI"
   },
   "license": "MIT",
+  "homepage": "https://github.com/Avada-AI/shopify-chatgpt-ads",
+  "repository": "https://github.com/Avada-AI/shopify-chatgpt-ads",
   "keywords": ["shopify", "chatgpt", "chatgpt-ads", "analytics", "attribution", "conversion-tracking", "agent-skills"]
 }

@@ -1,12 +1,12 @@
 {
-  "name": "chatgpt-channel-skills",
+  "name": "avada-ai",
   "owner": {
     "name": "Avada"
   },
   "description": "Read-only skills that measure ChatGPT as a sales channel for a Shopify store.",
   "plugins": [
     {
-      "name": "chatgpt-channel-skills",
+      "name": "shopify-chatgpt-ads",
       "source": "./",
       "description": "Three read-only skills: ChatGPT traffic report, ChatGPT Ads tracking check, ChatGPT store readiness. Markdown only."
     }

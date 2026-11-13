@@ -1,4 +1,8 @@
-# chatgpt-channel-skills
+# Shopify ChatGPT Ads
+
+Agent skills that help a Shopify store sell through ChatGPT. Ask your AI agent (Claude Code, Codex, Cursor and others) how much ChatGPT really sends your store, whether your ChatGPT Ads tracking is right, and whether your catalog is ready.
+
+> **Coming next:** an MCP server to manage ChatGPT ad campaigns from your agent (campaigns start paused, nothing spends without your yes), and measured orders and True ROAS through Avada's free Shopify app. Watch or star the repository to follow.
 
 Three read-only Agent Skills that let an AI agent answer one question for a Shopify store:
 **how much does ChatGPT really send this store, and is its ChatGPT Ads tracking right?**
@@ -63,23 +67,21 @@ Score: 71.5 of 90 points checked (79%). 10 points not checked.
 
 ## Install
 
-Replace `OWNER` with the GitHub account that hosts this repository.
-
 **Claude Code** (installs the whole repository as a plugin, fact sheet included):
 
 ```
-/plugin marketplace add OWNER/chatgpt-channel-skills
-/plugin install chatgpt-channel-skills@chatgpt-channel-skills
+/plugin marketplace add Avada-AI/shopify-chatgpt-ads
+/plugin install shopify-chatgpt-ads@avada-ai
 ```
 
-From a shell: `claude plugin marketplace add OWNER/chatgpt-channel-skills`, then `claude plugin install chatgpt-channel-skills@chatgpt-channel-skills`.
+From a shell: `claude plugin marketplace add Avada-AI/shopify-chatgpt-ads`, then `claude plugin install shopify-chatgpt-ads@avada-ai`.
 
 **Codex, Cursor, Copilot, OpenCode and most other agents** (through the open `skills` CLI, Node.js 22.20 or later):
 
 ```bash
-npx skills add OWNER/chatgpt-channel-skills
-npx skills add OWNER/chatgpt-channel-skills --skill chatgpt-traffic-report   # one skill
-npx skills add OWNER/chatgpt-channel-skills -a codex -g                      # one agent, all projects
+npx skills add Avada-AI/shopify-chatgpt-ads
+npx skills add Avada-AI/shopify-chatgpt-ads --skill chatgpt-traffic-report   # one skill
+npx skills add Avada-AI/shopify-chatgpt-ads -a codex -g                      # one agent, all projects
 ```
 
 This copies the three skill folders only. The fact sheet stays in this repository; each skill carries the facts it needs and the date they were checked.
@@ -87,7 +89,7 @@ This copies the three skill folders only. The fact sheet stays in this repositor
 **Codex and the ChatGPT desktop app, as a plugin:**
 
 ```bash
-codex plugin marketplace add OWNER/chatgpt-channel-skills
+codex plugin marketplace add Avada-AI/shopify-chatgpt-ads
 ```
 
 Then install it from the plugin browser. The root `plugin.json` is the portable Agent Plugins manifest. This path is documented by OpenAI but has not been tested by us.
@@ -122,7 +124,7 @@ These skills diagnose; they do not fix. For what they find:
 
 - Product data and policies are fixed in the Shopify admin.
 - Tracking is fixed in whatever installed the pixel. OpenAI publishes its own Shopify app, and several third-party pixel apps exist.
-- The team that publishes these skills also makes **Avada ChatGPT Ads**, a Shopify app that installs OpenAI's pixel and server-side Conversions API events with one event id per event and follows the store's consent settings. Documentation: https://docs.avada.io/chatgpt-ads. The skills do not need it and do not check for it.
+- The team that publishes these skills also makes **Avada ChatGPT Ads**, a Shopify app that installs OpenAI's pixel and server-side Conversions API events with one event id per event and follows the store's consent settings. Install: https://apps.shopify.com/avada-chatgpt-pixel. Documentation: https://docs.avada.io/chatgpt-ads. The skills do not need it and do not check for it.
 
 ## Licence
 
