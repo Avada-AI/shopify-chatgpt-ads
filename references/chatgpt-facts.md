@@ -1,6 +1,6 @@
 # ChatGPT channel fact sheet
 
-Last full check: **2026-11-11**. Every skill in this repository cites the fact ids below.
+Last full check: **2026-11-11** (sections S, O, C, copied from the read-only `chatgpt-channel-skills` set) and **2026-11-13** (section A, the Ads API facts the MCP server and the skills rely on). Every skill in this repository cites the fact ids below.
 
 How to read it:
 
@@ -75,6 +75,31 @@ How to read it:
 | C4 | From about 2026-10-08 (afternoon, US Pacific) to 2026-10-15, links in ChatGPT answers carried neither the tag nor a referrer, so those visits were filed as Direct. A fix rolled out on 2026-10-15. OpenAI made no public statement; an Adobe analyst said OpenAI told him it was a bug. | 2026-11-11 | https://www.seroundtable.com/utm-parameters-missing-chatgpt-42299.html and https://www.relevantaudience.com/analytics/chatgpt-utm-tag-bug-fixed-openai-confirmed-adobe/ | secondary, two reports that agree. Any report that covers these days must carry a note. |
 | C5 | Nothing separates paid from organic ChatGPT visits by default. A paid click carries `oppref` on the landing URL (O6) and whatever UTM values the advertiser's template sets (O10). An organic link carries `utm_source=chatgpt.com` (C1). | 2026-11-11 | Follows from O6, O10, C1 | derived. Whether Shopify keeps the `oppref` query parameter in `landing_page_url` is unconfirmed: check on the store. |
 
+## A. OpenAI Ads API (what the MCP server encodes)
+
+`measured` = seen by Avada on its own live probe ad account (currency VND, no payment method, so nothing could spend), on the date given. It is one account: confirm on yours.
+
+| Id | Claim | Checked | Source | Confidence |
+|---|---|---|---|---|
+| A1 | Base URL `https://api.ads.openai.com/v1`, `Authorization: Bearer <Advertiser API key>`. One key is scoped to one ad account. Keys are created in Ads Manager > Settings. | 2026-11-13 | https://developers.openai.com/ads/api-reference/authentication | doc |
+| A2 | Updates are `POST` to the object URL; the only `PATCH` is the feed Delta API (`PATCH /feeds/{id}/products`). State changes have dedicated endpoints: `POST /{campaigns,ad_groups,ads}/{id}/{activate,pause,archive}`. Archiving is not reversible. | 2026-11-13 | https://developers.openai.com/ads/api-reference/campaigns | doc |
+| A3 | Supported creates take an `Idempotency-Key`; reuse the same key and body when retrying the same creation. It is required for Maximize Results ad groups. | 2026-11-13 | https://developers.openai.com/ads/api-overview and /ads/bidding-budgets | doc |
+| A4 | Budgets and bids are integer micros of the account currency (1 unit = 1,000,000). Exactly one of `daily_spend_limit_micros` or `lifetime_spend_limit_micros`. A daily budget cannot switch back to lifetime by update. Daily minimums depend on the currency and appear only in the refusal (120,000 VND on the probe account). | 2026-11-13 | https://developers.openai.com/ads/bidding-budgets | doc; minimum measured 2026-09-29 |
+| A5 | Insights `spend`, `cpc`, `cpm` are major units of the account currency; `ctr` is a ratio. `null` means unavailable, not zero. Conversions update through daily processing. | 2026-11-13 | https://developers.openai.com/ads/reporting | doc |
+| A6 | Insights attribution: click window 7/14/30, view window 0/1, time basis `ad_event_time`/`conversion_time`; omitted = 30/1/ad_event_time and `conversions` then include view-through (changed 2026-09-30 without a version bump). | 2026-11-13 | https://developers.openai.com/ads/reporting#understand-attribution | doc; 3-day window refused (400), measured 2026-10-08 |
+| A7 | Attributed sales fields are refused for days before a date OpenAI names in the 400 message, while delivery metrics and `conversions` read the full 365 days. | 2026-09-28 | Avada probe account | measured |
+| A8 | Strategy per objective: impressions -> fixed_bid (impression billing); clicks -> maximize_clicks or fixed_bid; conversions -> maximize_conversions or fixed_bid (click billing). Maximize Results needs a daily budget and no `max_bid_micros`. For impression billing the bid is per impression (60 CPM = 60000 micros). | 2026-11-13 | https://developers.openai.com/ads/bidding-budgets | doc |
+| A9 | Max Bid / Max CPC (`fixed_bid`) retires for existing campaigns on 2027-01-01, replaced by Target CPA / Target CPC, which the API did not offer on 2026-11-13. | 2026-11-13 | OpenAI's notice to advertisers, as recorded by Avada | secondary |
+| A10 | Every create through the docs' own walkthroughs uses `status: paused`; ads are submitted for review on create (`review_status` in_review / approved / rejected). A preview (`POST /ads/{id}/preview`) works for a paused ad and expires after 24 hours; it shows appearance, not eligibility. | 2026-11-13 | https://developers.openai.com/ads/api-reference/ads | doc; previews measured 2026-09-29 |
+| A11 | Archived campaigns and ads drop out of list endpoints; a read by id still answers. Archived ad groups stay in the list with `status: archived`. Archiving a campaign does not archive its ad groups and ads. | 2026-09-29 | Avada probe account | measured |
+| A12 | `oppref` is reserved in `query_string_template` ("contains reserved query parameter(s)"); OpenAI adds it to the landing URL itself. | 2026-09-29 | Avada probe account | measured |
+| A13 | Location targeting takes ids from `GET /geo_lookup/search` (country, region, market) in `targeting.locations.include`. An account can target only the countries OpenAI allows it, and nothing lists them; the lookup is not limited to them. A product-feed campaign accepted a region id on create and edit although the docs say country level only. | 2026-11-13 | https://developers.openai.com/ads/location-targeting | doc; account limits measured 2026-10-08, regions measured 2026-11-13 (serving not measured) |
+| A14 | Delta API: `products[].id` is the group_id (or item_id when ungrouped), `variants[].id` the item_id; `price` is integer minor units with `currency`; `availability.status` in_stock / out_of_stock. `accepted: true` does not confirm the ids matched. One unknown variant -> 422 and nothing in the request is applied. Changes showed in about 60 s. A re-uploaded file did not change items OpenAI already held (3 h 52 min later). | 2026-11-13 | https://developers.openai.com/ads/delta-feeds | doc; behaviour measured 2026-09-28 |
+| A15 | `GET /feeds` lists feeds with `feed_id` (not `id`), `countries`, `currencies`, `campaign_count`, `product_count`. `POST /feeds/{id}/products/query` returns OpenAI's copy with `total_count` and `matched_count`, no availability and no group_id. | 2026-11-13 | live read-only check of this kit | measured |
+| A16 | Errors: branch on the HTTP status only (bodies can say `server_error` on a 4xx). 403 "Only ad account admins..." = the key is not an admin's (pixel creation, spend limits). Schema validation runs before permission checks. | 2026-10-29 | Avada probe account | measured |
+| A17 | Audit logs attribute API-key changes to the key's owner (`actor_type: sofa`, the owner's user id), the same as that person's Ads Manager edits. | 2026-10-08 | Avada probe account | measured |
+| A18 | Rate limits: 600 requests per minute per endpoint, 1,200 overall, per ad account and per IP. | 2026-11-13 | https://developers.openai.com/ads/api-overview | doc |
+
 ## Not confirmed on 2026-11-11
 
 - How Shopify decides a session's `agentic_referring_channel` (S3).
@@ -84,4 +109,5 @@ How to read it:
 - Whether Agentic storefronts or Catalog status can be read through the Admin API (S23).
 - How OpenAI's own Shopify app installs the pixel and whether it sends server events (O14).
 - The primary text of OpenAI's FAQ on `utm_source=chatgpt.com` (C1) and any exact share of clicks without a referrer (C2, C3).
-- None of the ShopifyQL queries in the skills has been run on a store. See `docs/TESTING.md`.
+- Whether Avada's Measurement API answers match the preview contract in `docs/measurement-api.md` (the app side ships in parallel).
+- How the 2027-01-01 Max CPC retirement will look in the API (A9).
