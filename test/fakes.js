@@ -148,7 +148,7 @@ export async function startFakeOpenAI(options) {
       return send(res, 200, {...obj, ...(url.searchParams.getAll('include[]').includes('serving_issues') ? {serving_issues: []} : {})});
     }
     if (path === '/upload') return send(res, 200, {file_id: `file_${++seq}`});
-    if (path === '/feeds') return send(res, 200, list([{id: 'fd_1', name: 'Store feed', countries: ['US'], product_count: 2}]));
+    if (path === '/feeds') return send(res, 200, list([{feed_id: 'fd_1', name: 'Store feed', countries: ['US'], product_count: 2}]));
     if (path === '/feeds/uploads') {
       return send(res, 200, list([{feed_id: 'fd_1', upload_id: 'up_1', status: 'completed_with_errors', rows_accepted: 2, rows_rejected: 1, diagnostics: [{code: 'invalid_value', field: 'price', rows_affected: 1}]}, {feed_id: 'fd_other', upload_id: 'up_2', status: 'completed'}]));
     }

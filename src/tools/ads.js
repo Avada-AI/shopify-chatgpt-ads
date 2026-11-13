@@ -363,7 +363,7 @@ export const adsTools = [
     name: 'list_feeds',
     title: 'List product feeds',
     kind: 'read',
-    description: "Product feeds in the ad account with countries and product_count (ingested, ads-eligible products; can read 0 while an upload is processing). There is no get-one-feed endpoint.",
+    description: "Product feeds in the ad account (id in feed_id) with countries, currencies, campaign_count and product_count (ingested, ads-eligible products; can read 0 while an upload is processing). There is no get-one-feed endpoint.",
     input: {},
     run: async (_args, ctx) => ({feeds: (await ctx.ads.get('/feeds', {'include[]': ['product_count']})).data || []})
   },
