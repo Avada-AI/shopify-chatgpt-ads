@@ -4,7 +4,7 @@ command = "npx"
 args = ["-y", "github:Avada-AI/shopify-chatgpt-ads"]
 env_vars = ["OPENAI_ADS_API_KEY", "AVADA_API_KEY", "CHATGPT_ADS_READ_ONLY"]
 
-# Avada's hosted server for measured orders and True ROAS (preview). Sign in with:
+# Avada's hosted server for measured orders and True ROAS. Sign in with:
 #   codex mcp login avada-measurement
 [mcp_servers.avada-measurement]
 url = "https://avada-chatgpt.firebaseapp.com/mcp"

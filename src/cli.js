@@ -10,7 +10,7 @@ Environment:
   CHATGPT_ADS_READ_ONLY  1 = offer no write tool at all
   AVADA_API_KEY          avk_live_... key from Avada ChatGPT Ads (Settings > AI agents) for measured data
   AVADA_API_BASE         default https://avada-chatgpt.firebaseapp.com
-  AVADA_API_PATH         default /data/v1 (preview)
+  AVADA_API_PATH         default /data/v1 (measurement API v1)
   CHATGPT_ADS_AUDIT_LOG  default ~/.chatgpt-ads-kit/audit.log (every write, no secrets)
 `;
 

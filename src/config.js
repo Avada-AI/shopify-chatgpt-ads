@@ -5,7 +5,7 @@ import {DEFAULT_ADS_BASE} from './ads-client.js';
 export const AVADA_APP_URL = 'https://apps.shopify.com/avada-chatgpt-pixel';
 export const AVADA_DOCS_URL = 'https://docs.avada.io/chatgpt-ads';
 export const DEFAULT_AVADA_BASE = 'https://avada-chatgpt.firebaseapp.com';
-// Preview: the REST mirror of Avada's hosted MCP tools (`POST <base>/data/v1/<tool>`).
+// Measurement API v1: the REST mirror of Avada's hosted MCP tools (`POST <base>/data/v1/<tool>`).
 export const DEFAULT_AVADA_PATH = '/data/v1';
 
 /**
